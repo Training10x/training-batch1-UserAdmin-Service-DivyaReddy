@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestControllerAdvice
-public class HandleConflictException {
+public class HandleConflictException extends Exception  {
 
         @ExceptionHandler(ConflictException.class)
-        public ResponseEntity<Map<String, Object>> ConflictExceptionHandler(ConflictException ex) {
+        public ResponseEntity<Map<String, Object>> conflictExceptionHandler(ConflictException ex) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.CONFLICT.value());
             response.put("error", "Conflict");

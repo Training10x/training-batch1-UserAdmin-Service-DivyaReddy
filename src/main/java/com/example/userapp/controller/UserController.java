@@ -5,12 +5,10 @@ import com.example.userapp.dto.StatusResponse;
 import com.example.userapp.dto.UpdateDetails;
 import com.example.userapp.dto.UserResponse;
 import com.example.userapp.entity.User;
-import com.example.userapp.service.UserServiceImpl;
 import com.example.userapp.service.impl.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +36,7 @@ public class UserController {
     }
 
     @PostMapping("/api/v1/users")
-    public ResponseEntity<Long> createUser(@RequestBody User user) {
+    public ResponseEntity<Long> createUser(@RequestBody @Valid User user) {
         User savedUser = userService.createUser(user);
         logger.info("User created: {}", user);
         return new ResponseEntity<>(savedUser.getId(), HttpStatus.CREATED);
@@ -84,17 +82,5 @@ public class UserController {
         } else {
             return new ResponseEntity<>("Some error occurred", HttpStatus.BAD_REQUEST);
         }
-    }
-
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Map<String, String> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach(error -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
-        return errors;
     }
 }

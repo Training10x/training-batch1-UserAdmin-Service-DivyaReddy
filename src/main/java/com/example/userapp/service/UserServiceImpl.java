@@ -1,5 +1,4 @@
 package com.example.userapp.service;
-
 import com.example.userapp.dto.StatusResponse;
 import com.example.userapp.dto.UpdateDetails;
 import com.example.userapp.exception.NotFoundException;
@@ -8,22 +7,12 @@ import com.example.userapp.dto.SearchResponse;
 import com.example.userapp.dto.UserResponse;
 import com.example.userapp.entity.User;
 import com.example.userapp.repository.UserRepository;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.example.userapp.mapper.UserMapper;
 
@@ -41,7 +30,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(User user) {
-        System.out.println(userRepository);
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
         return userRepository.save(user);
     }
@@ -52,10 +40,10 @@ public class UserServiceImpl implements UserService {
         User user1 = userRepository.findById(userId)
                 .orElseThrow(()-> new NotFoundException("user with this id not found "));
 
-        if(status.getStatus()=="enabled")
+        if(status.getStatus().equals("enabled"))
             user1.setStatusisEnabled(true);
 
-        if(status.getStatus()=="disabled")
+        if(status.getStatus().equals("disabled"))
             user1.setStatusisEnabled(false);
 
         User savedUser = userRepository.save(user1);
@@ -112,7 +100,7 @@ public class UserServiceImpl implements UserService {
         // Map results to UserResponse DTOs
         List<UserResponse> userResponses = userPage.stream()
                 .map(userMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
 
         // Build SearchResponse DTO
         return SearchResponse.builder()
@@ -122,67 +110,5 @@ public class UserServiceImpl implements UserService {
                 .totalCount(userPage.getTotalElements())
                 .build();
     }
-//
-//    public SearchResponse retrieveUsers(Integer page, Integer limit, String firstName, String lastName, String email, String phone, String middleName, String designation, String role, String companyId) {
-//        Specification<User> specification = new Specification<User>() {
-//            public Predicate toPredicate(Root<User> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
-//                List<Predicate> predicates = new ArrayList<Predicate>();
-//                if(!StringUtils.isEmpty(firstName)) {
-//                    predicates.add(builder.equal(root.get("firstName"), firstName));
-//                }
-//                if(!StringUtils.isEmpty(lastName)) {
-//                    predicates.add(builder.equal(root.get("lastName"), lastName));
-//                }
-//                if(!StringUtils.isEmpty(email)) {
-//                    predicates.add(builder.equal(root.get("email"), email));
-//                }
-//                if(!StringUtils.isEmpty(phone)) {
-//                    predicates.add(builder.equal(root.get("phone"), phone));
-//                }
-//                if(!StringUtils.isEmpty(middleName)) {
-//                    predicates.add(builder.equal(root.get("middleName"), middleName));
-//                }
-//                if(!StringUtils.isEmpty(designation)) {
-//                    predicates.add(builder.equal(root.get("designation"), designation));
-//                }
-//                if(!StringUtils.isEmpty(role)) {
-//                    predicates.add(builder.equal(root.get("role"), role));
-//                }
-//                if(!StringUtils.isEmpty(companyId)) {
-//                    predicates.add(builder.equal(root.get("customerId"), companyId));
-//                }
-//
-//                return builder.and(predicates.toArray(new Predicate[predicates.size()]));
-//            }
-//        };
-//
-//
-//        if(page == null) {
-//            page = 0;
-//        }
-//
-//        if(limit == null) {
-//            limit = 1000;
-//        }
-//
-//        Page<User> pageData = userRepository.findAll(specification, PageRequest.of(page, limit));
-//        List<UserResponse> userResponse = pageData.toList().stream().map(userObj -> {
-//          return UserResponse.builder()
-//                  .id(userObj.getId())
-//                  .firstName(userObj.getFirstName())
-//                  .middleName(userObj.getMiddleName())
-//                  .lastName(userObj.getLastName())
-//                  .email(userObj.getEmail())
-//                  .phone(userObj.getPhone())
-//                  .designation(userObj.getDesignation())
-//                  .role(userObj.getRole()).build();
-//        }).toList();
-//
-//        return SearchResponse.builder()
-//                .users(userResponse)
-//                .currentPage(page)
-//                .totalCount(pageData.getTotalElements())
-//                .pageCount(pageData.getTotalPages())
-//                .build();
-//    }
+
 }

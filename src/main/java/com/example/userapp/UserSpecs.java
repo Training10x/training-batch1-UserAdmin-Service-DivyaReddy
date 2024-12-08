@@ -4,6 +4,14 @@ import com.example.userapp.entity.User;
 import org.springframework.data.jpa.domain.Specification;
 
 public class UserSpecs {
+
+    private UserSpecs() {
+        //No need to initialize any params.
+
+    }
+
+
+
     public static Specification<User> firstNameEquals(String firstName) {
         return (root, query, builder) ->
                 firstName == null ?
