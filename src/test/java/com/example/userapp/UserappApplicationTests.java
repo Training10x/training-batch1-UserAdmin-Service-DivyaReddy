@@ -70,6 +70,7 @@ class UserServiceImplTest {
 		verify(userRepository, times(1)).save(user);
 	}
 
+
 	@Test
 	void testUpdateUserStatus_UserNotFound() {
 		when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -78,6 +79,27 @@ class UserServiceImplTest {
 		status.setStatus("enabled");
 
 		assertThrows(NotFoundException.class, () -> userService.updateUserStatus(1L, status));
+	}
+
+	@Test
+	void testUpdateUser_UserFound_NoFields() {
+		User user = new User();
+		user.setId(1L);
+		user.setEmail("old@example.com");
+
+
+		when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+		when(userRepository.save(any(User.class))).thenReturn(user);
+
+		UpdateDetails updateDetails = new UpdateDetails();
+
+		UserResponse userResponse = new UserResponse();
+		when(userMapper.toDTO(any(User.class))).thenReturn(userResponse);
+
+		UserResponse result = userService.updateUser(1L, updateDetails);
+
+		assertNotNull(result);
+		verify(userRepository, times(1)).save(user);
 	}
 
 	@Test
@@ -136,6 +158,28 @@ class UserServiceImplTest {
 		when(userMapper.toDTO(any(User.class))).thenReturn(userResponse);
 
 		SearchResponse result = userService.retrieveUsers(0, 10, "John", "Doe", "1234567890", "admin");
+
+		assertNotNull(result);
+		assertEquals(1, result.getUsers().size());
+		assertEquals(1L, result.getUsers().get(0).getId());
+	}
+
+	@Test
+	void testRetrieveUsersEmptyValues() {
+		User user = new User();
+		user.setId(1L);
+		user.setFirstName("John");
+		Page<User> userPage = new PageImpl<>(Collections.singletonList(user));
+
+		when(userRepository.findByFirstNameContainingAndLastNameContainingAndPhoneContainingAndRoleContaining(
+				anyString(), anyString(), anyString(), anyString(), any(PageRequest.class)
+		)).thenReturn(userPage);
+
+		UserResponse userResponse = new UserResponse();
+		userResponse.setId(1L);
+		when(userMapper.toDTO(any(User.class))).thenReturn(userResponse);
+
+		SearchResponse result = userService.retrieveUsers(null, null, null, null, null, null);
 
 		assertNotNull(result);
 		assertEquals(1, result.getUsers().size());
